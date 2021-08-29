@@ -9,6 +9,9 @@
   let imagePieces = new Array(puzzlePieces);
   let puzzle = [...imagePieces.keys()].map(String);
   let markers = document.querySelectorAll('a-marker');
+  let positionMarkers = [];
+  let tolerance = 1.9;
+  let check = new Array(6);
 
   cost init = () => {
     video = document.querySelector('video');
@@ -51,6 +54,7 @@
       .then((img) => {
         image.src = URL.createObjectURL(img);
         image.addEventListener('load', () => createImagePieces(image));
+        setInterval(() => checkDistance(), 1000);
       })
       .catch((error) => {console.log('takePhoto() error', error)});
   };
@@ -88,7 +92,42 @@
     return randomArray;
   }
 
+
+  const checkDistance = () => {
+    for(let i = 0; i < markers.length; i++){
+      positionMarkers[i] = markers[i].object3D;
+    }
+    if ((positionMarkers[puzzle[0]].position.x - positionMarkers[puzzle[8]].position.x) !== 0){
+      for(let i = 0; i < numRow; ++i){
+        if(Math.abs(positionMarkers[puzzle[0 + (3 * i)]].position.x - positionMarkers[puzzle[1+ (3 * i)]].position.x) < tolerance &&
+          Math.abs(positionMarkers[puzzle[1 + (3 * i)]].position.x - positionMarkers[puzzle[2 + (3 * i)]].position.x) < tolerance &&
+          Math.abs(positionMarkers[puzzle[0 + (3 * i)]].rotation.x - positionMarkers[puzzle[1+ (3 * i)]].rotation.x) < tolerance &&
+          Math.abs(positionMarkers[puzzle[1 + (3 * i)]].rotation.x - positionMarkers[puzzle[2 + (3 * i)]].rotation.x) < tolerance) {
+            check[i] = true;
+        }
+        else {
+          check[i] = false;
+        }
+      for (let i =0; i < numCol; ++i) {
+        if (Math.abs(positionMarkers[puzzle[i]].position.y - positionMarkers[puzzle[3 + i]].position.y ) < tolerance &&
+          Math.abs(positionMarkers[puzzle[3 + i]].position.y - positionMarkers[puzzle[6 + i]].position.y ) < tolerance &&
+          Math.abs(positionMarkers[puzzle[i]].rotation.y - positionMarkers[puzzle[3 + i]].rotation.y ) < tolerance &&
+          Math.abs(positionMarkers[puzzle[3 + i]].rotation.y - positionMarkers[puzzle[6 + i]].rotation.y ) < tolerance) {
+            check[3+i] = true;
+        } else {
+          check[3+i] = false;
+        }
+      }
+      if(check.every(puzzleCheck)) {
+        console.log('Solved!!!');
+        const solved = document.querySelector(`.solved`);
+        solved.style.display = "flex";
+      }
+    }
+  };
+
+  const puzzleCheck = (check) => check === true;
+
   window.addEventListener(`load`, () => setTimeout(() => init(), 1000));
 
-  const checkDistance = () => {};
 }
