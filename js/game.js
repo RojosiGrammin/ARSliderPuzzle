@@ -1,10 +1,10 @@
 {
-  const image = new Image(),
-    takePhotoButton = document.querySelector('.takePhoto');
-
-  // New Game-Level Variables
-  let constraints, imageCapture, mediaStream, video, numCol = 3, numRow = 3;
-  let puzzlePieces = numCol * numRow;
+  const takePhotoButton = document.querySelector('.takePhoto');
+  let video;
+  let mediaStream;
+  let imageCapture;
+  let image = new Image();
+  let numCol  3, numRow = 3;
   let pieces = puzzlePieces - 1;
   let imagePieces = new Array(puzzlePieces);
   let puzzle = [...imagePieces.keys()].map(String);
@@ -20,24 +20,20 @@
 
   // Get a video stream from the camera
   const getStream = () => {
-
     if (mediaStream) {
       mediaStream.getTracks().forEach(track => track.stop());
     }
-
     constraints = {
       video: {
         width: 720,
         height: 720,
       }
     };
-
     navigator.mediaDevices.getUserMedia(constraints)
-      .error((error) => console.log('getUserMedia() error:##', error))
+      .catch(error => {
+        console.log('getUserMedia error', error)
+      })
       .then(gotStream);
-      //.catch(error => {
-        //console.log('getMedia error', error);
-      //});
   };
 
   // Displays the getStream from the camera
@@ -48,16 +44,13 @@
     imageCapture = new ImageCapture(stream.getVideoTracks()[0]);
   };
 
-  window.addEventListener('load', () => setTimeout(() => init(), 1000));
-
   // Take the picture
   const getPicture = () => {
+    shuffle(puzzle);
     imageCapture.takePhoto()
       .then((img) => {
         image.src = URL.createObjectURL(img);
         image.addEventListener('load', () => createImagePieces(image));
-        setInterval(() => checkDistance(), 1000);
-        console.log(puzzle);
       })
       .catch((error) => {console.log('takePhoto() error', error)});
   };
@@ -69,11 +62,9 @@
     const pieceHeight = image.height / numRow;
     for (lex x = 0; x < numCol; x++) {
       for (let y = 0; y < numRow; y++) {
-        console.log(x, y);
-        // console output: 0,0 | 0,1 | 0,2 | 1,0 | etc.
         ctx.drawImage(image, x * pieceWidth, y * pieceHeight, pieceWidth, pieceHeight, 0, 0, canvas.width, canvas.height);
         imagePieces[8 - pieces] = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-        console.log(imagePieces);
+        console.log(imgPieces);
         pieces = pieces - 3;
         if (pieces < 0) {
           pieces = (puzzlePieces - 1) + pieces;
@@ -88,5 +79,16 @@
       marker.appendChild(aImg);
     })
   };
+
+  const shuffle = randomArray => {
+    for(let i = randomArray.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [randomArray[i], randomArray[j]] = [randomArray[j], randomArray[i]];
+    }
+    return randomArray;
+  }
+
+  window.addEventListener(`load`, () => setTimeout(() => init(), 1000));
+
   const checkDistance = () => {};
 }
