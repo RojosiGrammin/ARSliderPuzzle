@@ -25,6 +25,7 @@ body {
 .download {
   position: absolute;
   color: white;
+  text-decoration: none;
   font-size: 2rem;
   padding: .5rem 2rem;
   border: none;
